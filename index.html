@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud기술팀에게 물어봐</title>
+    <style>
+        @font-face {
+            font-family: 'HanjinGroupSans';
+            src: url('fonts/HanjinGroupSans-Light.otf') format('opentype');
+            font-weight: 300;
+        }
+        @font-face {
+            font-family: 'HanjinGroupSans';
+            src: url('fonts/HanjinGroupSans-Regular.otf') format('opentype');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'HanjinGroupSans';
+            src: url('fonts/HanjinGroupSans-Bold.otf') format('opentype');
+            font-weight: 700;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            font-family: 'HanjinGroupSans', sans-serif;
+            background: #0f0f1a;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden;
+        }
+
+        .viewport {
+            width: 100vw; height: 100vh; position: relative;
+            background: #111120; overflow: hidden;
+        }
+
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 60px 80px; text-align: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        .slide.active { opacity: 1; visibility: visible; }
+
+        /* 슬라이드 배경 변형 */
+        .slide-cover { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .slide-section { background: linear-gradient(135deg, #111120, #1a1a3e); }
+        .slide-question { background: #111120; }
+        .slide-closing { background: linear-gradient(135deg, #1a1a2e, #0f3460); }
+
+        /* 표지 */
+        .cover-badge {
+            font-size: 18px; font-weight: 700; letter-spacing: 4px; color: #06b6d4;
+            border: 1px solid rgba(6,182,212,0.3); padding: 10px 28px; border-radius: 50px;
+            margin-bottom: 32px; text-transform: uppercase;
+            animation: fadeInDown 0.8s ease both;
+        }
+        .cover-title {
+            font-size: 84px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        .cover-subtitle {
+            font-size: 32px; color: #94a3b8; font-weight: 300;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        /* 섹션 타이틀 슬라이드 */
+        .section-num {
+            font-size: 120px; font-weight: 700; color: rgba(99,102,241,0.15);
+            position: absolute; top: 40px; left: 60px;
+        }
+        .section-title {
+            font-size: 68px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 20px;
+        }
+        .section-desc { font-size: 28px; color: #94a3b8; font-weight: 300; line-height: 1.6; }
+
+        /* 질문 슬라이드 */
+        .q-emoji { font-size: 72px; margin-bottom: 24px; }
+        .q-text {
+            font-size: 46px; font-weight: 700; color: #fff; line-height: 1.5;
+            max-width: 1100px;
+        }
+        .q-text .highlight {
+            background: linear-gradient(90deg, #6366f1, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .q-hint { font-size: 20px; color: #64748b; margin-top: 28px; }
+
+        /* 마무리 */
+        .closing-title { font-size: 76px; font-weight: 700; color: #fff; margin-bottom: 20px; }
+        .closing-sub { font-size: 34px; color: #94a3b8; font-weight: 300; }
+
+        /* 답변 그리드 — 워드클라우드 스타일 */
+        .answers-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+            gap: 16px 20px; max-width: 1100px;
+            transform: rotate(-1deg);
+        }
+        .answer-chip {
+            background: none; border: none;
+            color: #e2e8f0; font-weight: 700;
+            white-space: nowrap;
+            opacity: 0;
+            animation: popIn 0.5s ease both;
+        }
+        .answer-chip:nth-child(1) { font-size: 52px; color: #a78bfa; transform: rotate(2deg); animation-delay: 0.1s; }
+        .answer-chip:nth-child(2) { font-size: 34px; color: #94a3b8; transform: rotate(-1deg); animation-delay: 0.2s; }
+        .answer-chip:nth-child(3) { font-size: 56px; color: #38bdf8; transform: rotate(-3deg); animation-delay: 0.3s; }
+        .answer-chip:nth-child(4) { font-size: 38px; color: #f472b6; transform: rotate(1deg); animation-delay: 0.4s; }
+        .answer-chip:nth-child(5) { font-size: 22px; color: #64748b; transform: rotate(2deg); animation-delay: 0.5s; }
+        .answer-chip:nth-child(6) { font-size: 34px; color: #06b6d4; transform: rotate(-2deg); animation-delay: 0.6s; }
+        .answer-chip:nth-child(7) { font-size: 46px; color: #34d399; transform: rotate(3deg); animation-delay: 0.7s; }
+        .answer-chip:nth-child(8) { font-size: 32px; color: #94a3b8; transform: rotate(-1deg); animation-delay: 0.8s; }
+        .answer-chip:nth-child(9) { font-size: 42px; color: #f59e0b; transform: rotate(2deg); animation-delay: 0.9s; }
+        .answer-chip:nth-child(10) { font-size: 40px; color: #ef4444; transform: rotate(-2deg); animation-delay: 1.0s; }
+        .answer-chip:nth-child(11) { font-size: 34px; color: #a78bfa; transform: rotate(1deg); animation-delay: 1.1s; }
+        .answer-chip:nth-child(12) { font-size: 48px; color: #38bdf8; transform: rotate(-3deg); animation-delay: 1.2s; }
+        .answer-chip:nth-child(13) { font-size: 44px; color: #f472b6; transform: rotate(2deg); animation-delay: 1.3s; }
+        .answer-chip:nth-child(14) { font-size: 42px; color: #34d399; transform: rotate(-1deg); animation-delay: 1.4s; }
+        .answer-chip:nth-child(15) { font-size: 32px; color: #94a3b8; transform: rotate(3deg); animation-delay: 1.5s; }
+        .answer-chip:nth-child(16) { font-size: 38px; color: #f59e0b; transform: rotate(-2deg); animation-delay: 1.6s; }
+        .answer-chip:nth-child(17) { font-size: 30px; color: #06b6d4; transform: rotate(1deg); animation-delay: 1.7s; }
+
+        /* 온도 결과 */
+        .temp-result { width: 100%; max-width: 900px; }
+        .temp-avg { font-size: 28px; color: #94a3b8; margin-bottom: 6px; }
+        .temp-num { font-size: 80px; font-weight: 700; color: #06b6d4; }
+        .temp-comment { font-size: 24px; color: #64748b; margin-bottom: 40px; }
+        .temp-bars { display: flex; flex-direction: column; gap: 18px; }
+        .temp-row { display: flex; align-items: center; gap: 16px; }
+        .temp-label { font-size: 20px; color: #cbd5e1; min-width: 180px; text-align: left; }
+        .temp-bar-bg { flex: 1; height: 32px; background: rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; }
+        .temp-bar-fill { height: 100%; border-radius: 16px; width: 0; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .temp-bar-fill.cold { background: linear-gradient(90deg, #38bdf8, #6366f1); }
+        .temp-bar-fill.cool { background: linear-gradient(90deg, #34d399, #06b6d4); }
+        .temp-bar-fill.warm { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+        .temp-bar-fill.hot { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        .temp-count { font-size: 20px; color: #94a3b8; min-width: 50px; text-align: right; }
+
+        /* 결과 리스트 */
+        .result-list { width: 100%; max-width: 1100px; text-align: left; }
+        .result-items { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .result-items li {
+            font-size: 24px; color: #cbd5e1; line-height: 1.6;
+            padding: 12px 20px; border-left: 4px solid rgba(99,102,241,0.4);
+            background: rgba(99,102,241,0.05); border-radius: 0 8px 8px 0;
+            opacity: 0;
+            animation: slideInLeft 0.5s ease both;
+        }
+        .result-items li:nth-child(1) { animation-delay: 0.1s; }
+        .result-items li:nth-child(2) { animation-delay: 0.2s; }
+        .result-items li:nth-child(3) { animation-delay: 0.3s; }
+        .result-items li:nth-child(4) { animation-delay: 0.4s; }
+        .result-items li:nth-child(5) { animation-delay: 0.5s; }
+        .result-items li:nth-child(6) { animation-delay: 0.6s; }
+        .result-items li:nth-child(7) { animation-delay: 0.7s; }
+        .result-items li:nth-child(8) { animation-delay: 0.8s; }
+        .result-items.lg li { font-size: 28px; padding: 14px 24px; }
+
+        /* 카테고리 뱃지 */
+        .category-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+            max-width: 1200px;
+        }
+        .category-card {
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 16px; padding: 28px 36px;
+            text-align: center; min-width: 220px;
+            opacity: 0; animation: scaleIn 0.5s ease both;
+        }
+        .category-card:nth-child(1) { animation-delay: 0.1s; }
+        .category-card:nth-child(2) { animation-delay: 0.25s; }
+        .category-card:nth-child(3) { animation-delay: 0.4s; }
+        .category-card:nth-child(4) { animation-delay: 0.55s; }
+        .category-card:nth-child(5) { animation-delay: 0.7s; }
+        .category-card .cat-icon { font-size: 40px; margin-bottom: 10px; }
+        .category-card .cat-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .category-card .cat-count { font-size: 16px; color: #64748b; }
+
+        /* 네비게이션 */
+        .nav {
+            position: absolute; bottom: 20px; right: 30px; z-index: 100;
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.4); padding: 8px 16px; border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .nav-btn {
+            background: none; border: none; color: #94a3b8; font-size: 16px;
+            cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-indicator { font-size: 15px; color: #64748b; font-weight: 700; min-width: 50px; text-align: center; }
+
+        .keyboard-hint {
+            position: absolute; bottom: 20px; left: 30px; z-index: 100;
+            font-size: 12px; color: #475569;
+        }
+
+        /* 애니메이션 키프레임 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 슬라이드 진입 시 자식요소 애니메이션 리셋 */
+        .slide:not(.active) .answer-chip,
+        .slide:not(.active) .result-items li,
+        .slide:not(.active) .category-card {
+            animation: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="viewport">
+    <!-- 1. 표지 -->
+    <div class="slide slide-cover active" id="slide-1">
+        <div class="cover-badge">2026 Workshop Session</div>
+        <h1 class="cover-title">Cloud기술팀에게<br>물어봐</h1>
+        <p class="cover-subtitle">솔직하게, 편하게, 우리끼리 이야기</p>
+    </div>
+
+    <!-- 2. 팀장님의 발표 세션 -->
+    <div class="slide slide-section" id="slide-2">
+        <div class="section-num">01</div>
+        <h2 class="section-title">팀장님의 발표 세션</h2>
+        <p class="section-desc">지난 한 해 회고와 앞으로의 방향</p>
+    </div>
+
+    <!-- 3. 팀장님에게 물어봐 -->
+    <div class="slide slide-section" id="slide-3">
+        <div class="section-num">02</div>
+        <h2 class="section-title">팀장님에게 물어봐</h2>
+        <p class="section-desc">궁금했던 것, 지금이 기회!</p>
+    </div>
+
+    <!-- 3-1. 질문: 고양이 -->
+    <div class="slide slide-question" id="slide-4">
+        <div class="q-emoji">🐱</div>
+        <p class="q-text">고양이 이름이 뭐예요?</p>
+    </div>
+
+    <!-- 3-2. 질문: 스트레스 -->
+    <div class="slide slide-question" id="slide-5">
+        <div class="q-emoji">🧘</div>
+        <p class="q-text">스트레스 해소방법이<br>따로 있으신가요?</p>
+    </div>
+
+    <!-- 3-3. 질문: 잘하고 있나요 -->
+    <div class="slide slide-question" id="slide-6">
+        <div class="q-emoji">🤔</div>
+        <p class="q-text">저희 잘하고 있나요?</p>
+    </div>
+
+    <!-- 3-4. 질문: AI시대 -->
+    <div class="slide slide-question" id="slide-7">
+        <div class="q-emoji">🤖</div>
+        <p class="q-text">대 AI시대..<br>어느 정도까지 해야 할까요?</p>
+    </div>
+
+    <!-- 3-5. 질문: 2027 방향성 -->
+    <div class="slide slide-question" id="slide-8">
+        <div class="q-emoji">🧭</div>
+        <p class="q-text">2027년 Cloud기술팀<br>업무 방향성을 알려주세요!</p>
+    </div>
+
+    <!-- 3-6. 질문: 바라는 점 -->
+    <div class="slide slide-question" id="slide-9">
+        <div class="q-emoji">💬</div>
+        <p class="q-text">팀원들에게 바라는 점이 뭘까요?</p>
+    </div>
+
+    <!-- 3-7. 질문: 바라는 역량 -->
+    <div class="slide slide-question" id="slide-10">
+        <div class="q-emoji">🎯</div>
+        <p class="q-text">팀원들에게 바라는 역량이라던가,<br>나중에 회사에서 어떤 역할을<br>하고 있었으면 좋겠나요?</p>
+    </div>
+
+    <!-- 3-8. 질문: 부족한 부분 -->
+    <div class="slide slide-question" id="slide-11">
+        <div class="q-emoji">📊</div>
+        <p class="q-text">팀원들에게 가장 필요하거나<br>부족하다고 느껴지는 부분은?</p>
+    </div>
+
+    <!-- 3-9. 질문: IT전략실 대장 -->
+    <div class="slide slide-question" id="slide-12">
+        <div class="q-emoji">👑</div>
+        <p class="q-text">IT전략실 대장이 되시면<br>제일 먼저 바꾸고 싶은 것들<br>+ 유지하고 싶은 것들</p>
+    </div>
+
+    <!-- 3-10. 질문: 한진 -->
+    <div class="slide slide-question" id="slide-13">
+        <div class="q-emoji">✈️</div>
+        <p class="q-text">누군가는 한진 가나요?</p>
+    </div>
+
+    <!-- 3-11. 질문: 차 -->
+    <div class="slide slide-question" id="slide-14">
+        <div class="q-emoji">🚗</div>
+        <p class="q-text">팀장님 차 언제 바꾸시나요?</p>
+    </div>
+
+    <!-- 3-12. 질문: 마운자로 -->
+    <div class="slide slide-question" id="slide-15">
+        <div class="q-emoji">💊</div>
+        <p class="q-text">마운자로 후기 남겨주세요</p>
+    </div>
+
+    <!-- 3-13. 질문: 이상적 인원수 -->
+    <div class="slide slide-question" id="slide-16">
+        <div class="q-emoji">👥</div>
+        <p class="q-text">팀의 이상적인 인원수는?</p>
+    </div>
+
+    <!-- 3-14. 질문: 올해의 팀원 -->
+    <div class="slide slide-question" id="slide-17">
+        <div class="q-emoji">🏆</div>
+        <p class="q-text">팀장님이 생각하시는<br>올해의 팀원?</p>
+    </div>
+
+    <!-- 3-15. 질문: 어디까지 -->
+    <div class="slide slide-question" id="slide-18">
+        <div class="q-emoji">🪜</div>
+        <p class="q-text">어느 위치까지 올라가고 싶으신가요?<br>가능성은 몇 프로로 보시나요?</p>
+    </div>
+
+    <!-- 4. 분위기 온도 -->
+    <div class="slide slide-question" id="slide-19">
+        <div class="q-emoji">🌡️</div>
+        <p class="q-text">
+            요즘 내가 느끼는<br>
+            우리 Cloud기술팀의<br>
+            <span class="highlight">'분위기 온도'</span>는 몇 도인가요?
+        </p>
+    </div>
+
+    <!-- 4-결과. 분위기 온도 결과 -->
+    <div class="slide slide-question" id="slide-20">
+        <div class="temp-result">
+            <div class="temp-avg">평균</div>
+            <div class="temp-num"> 17° </div>
+            <div class="temp-comment">쌀쌀하지만 햇살은 비치는 초봄 날씨</div>
+            <div class="temp-bars">
+                <div class="temp-row"><span class="temp-label">❄️ 영하 10도</span><div class="temp-bar-bg"><div class="temp-bar-fill cold" data-width="47%"></div></div><span class="temp-count">8명</span></div>
+                <div class="temp-row"><span class="temp-label">🍃 영상 15도</span><div class="temp-bar-bg"><div class="temp-bar-fill cool" data-width="24%"></div></div><span class="temp-count">4명</span></div>
+                <div class="temp-row"><span class="temp-label">🔥 영상 36.5도</span><div class="temp-bar-bg"><div class="temp-bar-fill warm" data-width="18%"></div></div><span class="temp-count">3명</span></div>
+                <div class="temp-row"><span class="temp-label">🌋 영상 100도</span><div class="temp-bar-bg"><div class="temp-bar-fill hot" data-width="12%"></div></div><span class="temp-count">2명</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. 한 단어 / 한 문장 -->
+    <div class="slide slide-question" id="slide-21">
+        <div class="q-emoji">🧠</div>
+        <p class="q-text">
+            깊게 생각하지 말고 딱! 떠오르는 대로,<br>
+            지난 한 해 동안 우리 'Cloud기술팀'을<br>
+            <span class="highlight">'한 단어'</span>나 <span class="highlight">'한 문장'</span>으로 표현한다면?
+        </p>
+    </div>
+
+    <!-- 5-결과. 한 단어 / 한 문장 답변들 -->
+    <div class="slide slide-question" id="slide-22">
+        <div class="answers-grid">
+            <span class="answer-chip">우당탕탕</span>
+            <span class="answer-chip">업무 너무 많아여~~</span>
+            <span class="answer-chip">모래시계</span>
+            <span class="answer-chip">클기 야홍~</span>
+            <span class="answer-chip">KEHJCLOUDAIDATADEVSECOPS팀</span>
+            <span class="answer-chip">IT전략실의 코어</span>
+            <span class="answer-chip">재밌다</span>
+            <span class="answer-chip">그럭저럭</span>
+            <span class="answer-chip">arm</span>
+            <span class="answer-chip">각개전투</span>
+            <span class="answer-chip">공유세션</span>
+            <span class="answer-chip">역대급 모래시계</span>
+            <span class="answer-chip">One Love</span>
+            <span class="answer-chip">좋은 팀원들</span>
+            <span class="answer-chip">그냥저냥</span>
+            <span class="answer-chip">영크크</span>
+        </div>
+    </div>
+
+    <!-- 6. 팀의 방향성 -->
+    <div class="slide slide-section" id="slide-23">
+        <div class="section-num">03</div>
+        <h2 class="section-title">팀의 방향성</h2>
+        <p class="section-desc">Cloud기술팀이 나아갈 길에 대한 생각들</p>
+    </div>
+
+    <!-- 6-결과. 방향성 카테고리 -->
+    <div class="slide slide-question" id="slide-24">
+        <p class="q-text" style="font-size:36px; margin-bottom:40px;">우리 팀의 방향성에 대한 목소리들</p>
+        <div class="category-grid">
+            <div class="category-card">
+                <div class="cat-icon">🤝</div>
+                <div class="cat-title">타팀과 협업·시너지</div>
+                <div class="cat-count">기술 리더로서 실행 지원</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🎯</div>
+                <div class="cat-title">뾰족한 집중</div>
+                <div class="cat-count">너무 광범위하지 않게</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🤖</div>
+                <div class="cat-title">AI 주체적 활용</div>
+                <div class="cat-count">따라가기보다 주도적으로</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">📢</div>
+                <div class="cat-title">우리 팀 홍보</div>
+                <div class="cat-count">바쁜데 왜 안바빠보이지?</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🏛️</div>
+                <div class="cat-title">거버넌스 강화</div>
+                <div class="cat-count">클라우드 전문성 녹여내기</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6-결과. 방향성 상세 의견 -->
+    <div class="slide slide-question" id="slide-25">
+        <div class="result-list">
+            <ul class="result-items">
+                <li>기술 리더로서 각 팀 실행에 적극적으로 도움을 주면 좋겠어요</li>
+                <li>전문성을 바탕으로 한 타팀과 융합/시너지</li>
+                <li>AI를 따라가는 게 아니라 주체적으로 사용</li>
+                <li>우리팀 진짜 바쁜데 왜 안바빠보이지? 홍보가 필요하다는 생각</li>
+                <li>너무 광범위한 기술을 다루다 보니 뾰족한 지향점을 알기 어렵다</li>
+                <li>각 전문 기술 부문에서 유기적으로 협업하여 거버넌스 수립</li>
+                <li>팀 인원이 계속 늘어나야 하는 이유는 무엇일까요?</li>
+                <li>우리는 클라우드팀인가, 기술 전반을 다루는 팀인가</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 7. 잘해낸 점 -->
+    <div class="slide slide-question" id="slide-26">
+        <div class="q-emoji">👏</div>
+        <p class="q-text">
+            지난해부터 지금까지 Cloud기술팀이 달려오면서<br>
+            <span class="highlight">'이 부분만큼은 정말 잘해냈다'</span>고<br>
+            생각하는 점을 자유롭게 적어주세요.
+        </p>
+    </div>
+
+    <!-- 7-결과. 잘해낸 점 카테고리 -->
+    <div class="slide slide-question" id="slide-27">
+        <p class="q-text" style="font-size:36px; margin-bottom:40px;">잘해냈다! 🎉</p>
+        <div class="category-grid">
+            <div class="category-card">
+                <div class="cat-icon">🌱</div>
+                <div class="cat-title">신입의 빠른 적응</div>
+                <div class="cat-count">훌륭한 기여</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">⚡</div>
+                <div class="cat-title">분업화·전문화</div>
+                <div class="cat-count">팀 생산성 + 개인 역량 UP</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🚀</div>
+                <div class="cat-title">신기술 적극 도입</div>
+                <div class="cat-count">새로운 것에 도전</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🤝</div>
+                <div class="cat-title">ARM 등 챌린지 해결</div>
+                <div class="cat-count">슬기롭게 협업</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">📋</div>
+                <div class="cat-title">체계·규칙 수립</div>
+                <div class="cat-count">XW 리드</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7-결과. 잘해낸 점 답변들 -->
+    <div class="slide slide-question" id="slide-28">
+        <div class="result-list">
+            <ul class="result-items">
+                <li>훌륭한 신입들이 들어와서 기여를 정말 잘하고 있습니다!</li>
+                <li>각자 맡은 분야에서 최선을 다함</li>
+                <li>All in Cloud 환경에서 필요한 일을 모두 수행</li>
+                <li>체계를 세우고, 규칙을 만들고, XW를 리드함</li>
+                <li>분업화로 팀 생산성이 이전보다 좋아지고 개인 역량도 향상</li>
+                <li>신기술 도입을 누구보다 적극적으로 수용</li>
+                <li>문제가 생길 땐 선후배가 힘을 모아 지식을 나누며 해결</li>
+                <li>넓은 분야를 다루면서도 빈틈 없이 업무 수행</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 8. 아쉬운 점 -->
+    <div class="slide slide-question" id="slide-29">
+        <div class="q-emoji">💭</div>
+        <p class="q-text">
+            지나온 시간 중<br>
+            <span class="highlight">'이 부분은 조금 부족했거나 아쉬웠다'</span>고<br>
+            생각하시는 점이 있다면 자유롭게 적어주세요.
+        </p>
+    </div>
+
+    <!-- 8-결과. 아쉬운 점 카테고리 -->
+    <div class="slide slide-question" id="slide-30">
+        <p class="q-text" style="font-size:36px; margin-bottom:40px;">조금 아쉬웠던 점들 💭</p>
+        <div class="category-grid">
+            <div class="category-card">
+                <div class="cat-icon">🔇</div>
+                <div class="cat-title">소통 부족</div>
+                <div class="cat-count">분업 후 관심 저하·고립</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">📅</div>
+                <div class="cat-title">회의가 너무 많음</div>
+                <div class="cat-count">집중도·참여도 저하</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">😮‍💨</div>
+                <div class="cat-title">여유 부족</div>
+                <div class="cat-count">모두 바빠서...</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🏛️</div>
+                <div class="cat-title">거버넌스 미흡</div>
+                <div class="cat-count">KE AWS 고도화 부족</div>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon">🤝</div>
+                <div class="cat-title">타부서 협업</div>
+                <div class="cat-count">다소 보수적 스탠스</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8-결과. 아쉬운 점 답변들 -->
+    <div class="slide slide-question" id="slide-31">
+        <div class="result-list">
+            <ul class="result-items">
+                <li>분업 후 타 분야에 대한 관심이 줄고 특정 파트가 고립됨</li>
+                <li>모두가 바빠서 여유가 많이 부족한 분위기</li>
+                <li>팀 내 소통이 부족 — 소통 불통</li>
+                <li>레귤러 미팅, 공유세션 등 회의가 많아 집중도 저하</li>
+                <li>팀 운영 프로세스(업무 외)가 미흡</li>
+                <li>타 부서 협업에서 보수적 스탠스</li>
+                <li>여러 도메인 진행 중 정작 KE AWS 고도화 부족</li>
+                <li>거버넌스를 충분히 챙기지 못함</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 9. 팀원에게 궁금한 점 -->
+    <div class="slide slide-section" id="slide-32">
+        <div class="section-num">04</div>
+        <h2 class="section-title">팀원에게 물어봐</h2>
+        <p class="section-desc">서로에게 궁금했던 것들!</p>
+    </div>
+
+    <!-- 9-1. 궁금한 점: 썸 -->
+    <div class="slide slide-question" id="slide-33">
+        <div class="q-emoji">💘</div>
+        <p class="q-text">신현수 사원<br>썸타는 사람 있나요?</p>
+    </div>
+
+    <!-- 9-2. 궁금한 점: 결혼 일정 -->
+    <div class="slide slide-question" id="slide-34">
+        <div class="q-emoji">💍</div>
+        <p class="q-text">신승환 차장님 결혼 일정</p>
+    </div>
+
+    <!-- 9-3. 궁금한 점: 결혼 결심 -->
+    <div class="slide slide-question" id="slide-35">
+        <div class="q-emoji">💒</div>
+        <p class="q-text">용훈 차장님!<br>결혼을 결심하게 된<br>특별한 모먼트가 있으신가요?</p>
+    </div>
+
+    <!-- 9-4. 궁금한 점: 주니어 결혼 -->
+    <div class="slide slide-question" id="slide-36">
+        <div class="q-emoji">👶</div>
+        <p class="q-text">주니어들의 결혼 계획?</p>
+    </div>
+
+    <!-- 9-5. 궁금한 점: 관심사/취미 -->
+    <div class="slide slide-question" id="slide-37">
+        <div class="q-emoji">🎮</div>
+        <p class="q-text">퇴근하면 하루가 없는데..<br>다들 취미는 어떻게 챙기시나요?</p>
+    </div>
+
+    <!-- 9-6. 궁금한 점: 오쇠동 출근 -->
+    <div class="slide slide-question" id="slide-38">
+        <div class="q-emoji">🏢</div>
+        <p class="q-text">오쇠동 가면 출근<br>다들 차로 하실 예정인가요?</p>
+    </div>
+
+    <!-- 9-7. 궁금한 점: 주도적 업무 -->
+    <div class="slide slide-question" id="slide-39">
+        <div class="q-emoji">💡</div>
+        <p class="q-text">기존 전문 기술 부문 외에<br>내가 주도적으로 하고 싶은<br>업무가 있다면?</p>
+    </div>
+
+    <!-- 9-8. 궁금한 점: 스포츠 활동 -->
+    <div class="slide slide-question" id="slide-40">
+        <div class="q-emoji">⚽</div>
+        <p class="q-text">팀원들끼리 스포츠 활동이나<br>문화생활을 제안하고 싶은데<br>부담스러울지...?</p>
+    </div>
+
+    <!-- 10. 마무리 -->
+    <div class="slide slide-closing" id="slide-41">
+        <h2 class="closing-title">수고하셨습니다! 🍕</h2>
+        <p class="closing-sub">이제 밥 먹으러 갑시다!</p>
+    </div>
+
+    <!-- 네비게이션 -->
+    <div class="nav">
+        <button class="nav-btn" onclick="prev()">◀</button>
+        <span class="nav-indicator" id="navInd">1 / 41</span>
+        <button class="nav-btn" onclick="next()">▶</button>
+    </div>
+    <div class="keyboard-hint">← → / Space</div>
+</div>
+
+<script>
+const total = 41;
+let cur = 1;
+
+function show() {
+    for (let i = 1; i <= total; i++) {
+        const slide = document.getElementById(`slide-${i}`);
+        const isActive = i === cur;
+        slide.classList.toggle('active', isActive);
+
+        // 애니메이션 리셋: 슬라이드가 active 될 때 자식 애니메이션 재시작
+        if (isActive) {
+            // 워드클라우드 칩 애니메이션
+            slide.querySelectorAll('.answer-chip').forEach((el, idx) => {
+                el.style.animation = 'none';
+                el.offsetHeight; // reflow
+                el.style.animation = `popIn 0.5s ease ${(idx + 1) * 0.1}s both`;
+            });
+            // 리스트 아이템 애니메이션
+            slide.querySelectorAll('.result-items li').forEach((el, idx) => {
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = `slideInLeft 0.5s ease ${(idx + 1) * 0.1}s both`;
+            });
+            // 카테고리 카드 애니메이션
+            slide.querySelectorAll('.category-card').forEach((el, idx) => {
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = `scaleIn 0.5s ease ${(idx + 1) * 0.15}s both`;
+            });
+            // 온도 바 애니메이션
+            slide.querySelectorAll('.temp-bar-fill').forEach(el => {
+                const targetWidth = el.getAttribute('data-width');
+                if (targetWidth) {
+                    el.style.width = '0';
+                    setTimeout(() => { el.style.width = targetWidth; }, 100);
+                }
+            });
+        }
+    }
+    document.getElementById('navInd').textContent = `${cur} / ${total}`;
+}
+
+function next() { if (cur < total) { cur++; show(); } }
+function prev() { if (cur > 1) { cur--; show(); } }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+});
+
+// 초기 온도 바 애니메이션
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.querySelectorAll('#slide-20 .temp-bar-fill').forEach(el => {
+            const targetWidth = el.getAttribute('data-width');
+            if (targetWidth) el.style.width = targetWidth;
+        });
+    }, 500);
+});
+</script>
+</body>
+</html>
