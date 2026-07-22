@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud기술팀에게 물어봐</title>
+    <link rel="icon" href="logo.ico" type="image/x-icon">
     <style>
         @font-face {
             font-family: 'HanjinGroupSans';
@@ -294,16 +295,16 @@
     </div>
 
     <!-- 3-7. 질문: 바라는 역량 -->
-    <div class="slide slide-question" id="slide-10">
-        <div class="q-emoji">🎯</div>
-        <p class="q-text">팀원들에게 바라는 역량이라던가,<br>나중에 회사에서 어떤 역할을<br>하고 있었으면 좋겠나요?</p>
-    </div>
+<!--    <div class="slide slide-question" id="slide-10">-->
+<!--        <div class="q-emoji">🎯</div>-->
+<!--        <p class="q-text">팀원들에게 바라는 역량이라던가,<br>나중에 회사에서 어떤 역할을<br>하고 있었으면 좋겠나요?</p>-->
+<!--    </div>-->
 
     <!-- 3-8. 질문: 부족한 부분 -->
-    <div class="slide slide-question" id="slide-11">
-        <div class="q-emoji">📊</div>
-        <p class="q-text">팀원들에게 가장 필요하거나<br>부족하다고 느껴지는 부분은?</p>
-    </div>
+<!--    <div class="slide slide-question" id="slide-11">-->
+<!--        <div class="q-emoji">📊</div>-->
+<!--        <p class="q-text">팀원들에게 가장 필요하거나<br>부족하다고 느껴지는 부분은?</p>-->
+<!--    </div>-->
 
     <!-- 3-9. 질문: IT전략실 대장 -->
     <div class="slide slide-question" id="slide-12">
@@ -318,10 +319,10 @@
     </div>
 
     <!-- 3-11. 질문: 차 -->
-    <div class="slide slide-question" id="slide-14">
-        <div class="q-emoji">🚗</div>
-        <p class="q-text">팀장님 차 언제 바꾸시나요?</p>
-    </div>
+<!--    <div class="slide slide-question" id="slide-14">-->
+<!--        <div class="q-emoji">🚗</div>-->
+<!--        <p class="q-text">팀장님 차 언제 바꾸시나요?</p>-->
+<!--    </div>-->
 
     <!-- 3-12. 질문: 마운자로 -->
     <div class="slide slide-question" id="slide-15">
@@ -330,16 +331,16 @@
     </div>
 
     <!-- 3-13. 질문: 이상적 인원수 -->
-    <div class="slide slide-question" id="slide-16">
-        <div class="q-emoji">👥</div>
-        <p class="q-text">팀의 이상적인 인원수는?</p>
-    </div>
+<!--    <div class="slide slide-question" id="slide-16">-->
+<!--        <div class="q-emoji">👥</div>-->
+<!--        <p class="q-text">팀의 이상적인 인원수는?</p>-->
+<!--    </div>-->
 
     <!-- 3-14. 질문: 올해의 팀원 -->
-    <div class="slide slide-question" id="slide-17">
-        <div class="q-emoji">🏆</div>
-        <p class="q-text">팀장님이 생각하시는<br>올해의 팀원?</p>
-    </div>
+<!--    <div class="slide slide-question" id="slide-17">-->
+<!--        <div class="q-emoji">🏆</div>-->
+<!--        <p class="q-text">팀장님이 생각하시는<br>올해의 팀원?</p>-->
+<!--    </div>-->
 
     <!-- 3-15. 질문: 어디까지 -->
     <div class="slide slide-question" id="slide-18">
@@ -585,7 +586,7 @@
     <!-- 9-1. 궁금한 점: 썸 -->
     <div class="slide slide-question" id="slide-33">
         <div class="q-emoji">💘</div>
-        <p class="q-text">신현수 사원<br>썸타는 사람 있나요?</p>
+        <p class="q-text">신현수 사원님<br>썸타는 사람 있나요?</p>
     </div>
 
     <!-- 9-2. 궁금한 점: 결혼 일정 -->
@@ -633,7 +634,7 @@
     <!-- 10. 마무리 -->
     <div class="slide slide-closing" id="slide-41">
         <h2 class="closing-title">수고하셨습니다! 🍕</h2>
-        <p class="closing-sub">이제 밥 먹으러 갑시다!</p>
+        <p class="closing-sub">이제 밥 먹으러 가시죠!</p>
     </div>
 
     <!-- 네비게이션 -->
@@ -646,12 +647,12 @@
 </div>
 
 <script>
-const total = 41;
-let cur = 1;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
 
 function show() {
-    for (let i = 1; i <= total; i++) {
-        const slide = document.getElementById(`slide-${i}`);
+    slides.forEach((slide, i) => {
         const isActive = i === cur;
         slide.classList.toggle('active', isActive);
 
@@ -684,27 +685,20 @@ function show() {
                 }
             });
         }
-    }
-    document.getElementById('navInd').textContent = `${cur} / ${total}`;
+    });
+    document.getElementById('navInd').textContent = `${cur + 1} / ${total}`;
 }
 
-function next() { if (cur < total) { cur++; show(); } }
-function prev() { if (cur > 1) { cur--; show(); } }
+function next() { if (cur < total - 1) { cur++; show(); } }
+function prev() { if (cur > 0) { cur--; show(); } }
 
 document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
 });
 
-// 초기 온도 바 애니메이션
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        document.querySelectorAll('#slide-20 .temp-bar-fill').forEach(el => {
-            const targetWidth = el.getAttribute('data-width');
-            if (targetWidth) el.style.width = targetWidth;
-        });
-    }, 500);
-});
+// 초기 로드
+show();
 </script>
 </body>
 </html>
